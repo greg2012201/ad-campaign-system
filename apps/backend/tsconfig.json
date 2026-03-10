@@ -5,7 +5,14 @@
     "outDir": "dist",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "verbatimModuleSyntax": false
+    "verbatimModuleSyntax": false,
+    "strictPropertyInitialization": false
   },
-  "include": ["src"]
+  "include": ["src"],
+  "ts-node": {
+    "compilerOptions": {
+      "module": "CommonJS",
+      "moduleResolution": "node"
+    }
+  }
 }
