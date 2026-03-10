@@ -1,0 +1,15 @@
+{
+  "name": "campaign-system",
+  "private": true,
+  "scripts": {
+    "dev:infra": "./scripts/infra-up.sh",
+    "dev:api": "pnpm --filter backend run start:dev",
+    "dev:ui": "pnpm --filter @campaign-system/admin-ui run dev",
+    "dev:screen": "pnpm --filter screen-client run dev",
+    "infra:down": "./scripts/infra-down.sh",
+    "health": "./scripts/health-check.sh"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0"
+  }
+}
