@@ -12,6 +12,7 @@ import {
   imports: [
     TypeOrmModule.forFeature([OutboxEntity]),
     BullModule.registerQueue({ name: "template-build" }),
+    BullModule.registerQueue({ name: "publish" }),
   ],
   providers: [OutboxService, outboxRedisClientProvider, outboxRedlockProvider],
   exports: [OutboxService],

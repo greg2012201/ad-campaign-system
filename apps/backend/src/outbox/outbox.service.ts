@@ -19,6 +19,8 @@ export class OutboxService implements OnModuleDestroy {
   constructor(
     @InjectQueue("template-build")
     private readonly templateBuildQueue: Queue,
+    @InjectQueue("publish")
+    private readonly publishQueue: Queue,
     @Inject(OUTBOX_REDIS_CLIENT)
     private readonly redisClient: Redis,
     @Inject(OUTBOX_REDLOCK)
@@ -74,6 +76,9 @@ export class OutboxService implements OnModuleDestroy {
                 entry.eventType,
                 entry.payload,
               );
+              break;
+            case "template_ready":
+              await this.publishQueue.add(entry.eventType, entry.payload);
               break;
             default:
               this.logger.warn(
