@@ -5,6 +5,7 @@ import { ScheduleModule } from "@nestjs/schedule";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { CampaignsModule } from "./campaigns/campaigns.module";
 import { OutboxModule } from "./outbox/outbox.module";
+import { TemplateWorkerModule } from "./template-worker/template-worker.module";
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { OutboxModule } from "./outbox/outbox.module";
     }),
     CampaignsModule,
     OutboxModule,
+    TemplateWorkerModule,
   ],
   controllers: [],
   providers: [],

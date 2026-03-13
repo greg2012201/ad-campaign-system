@@ -25,6 +25,7 @@
     "class-transformer": "^0.5.0",
     "class-validator": "^0.14.0",
     "dotenv": "^17.3.1",
+    "fastify": "^5.8.2",
     "ioredis": "^5.10.0",
     "mqtt": "^5.0.0",
     "pg": "^8.13.0",
