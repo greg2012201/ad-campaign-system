@@ -7,6 +7,7 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { CampaignsModule } from "./campaigns/campaigns.module";
 import { OutboxModule } from "./outbox/outbox.module";
 import { TemplateWorkerModule } from "./template-worker/template-worker.module";
+import { PublisherModule } from "./publisher/publisher.module";
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { TemplateWorkerModule } from "./template-worker/template-worker.module";
     CampaignsModule,
     OutboxModule,
     TemplateWorkerModule,
+    PublisherModule,
   ],
   controllers: [],
   providers: [],

@@ -72,12 +72,12 @@ export class OutboxService implements OnModuleDestroy {
         try {
           switch (entry.eventType) {
             case "campaign_created":
-              await this.templateBuildQueue.add(
-                entry.eventType,
-                entry.payload,
-              );
+              await this.templateBuildQueue.add(entry.eventType, entry.payload);
               break;
             case "template_ready":
+              await this.publishQueue.add(entry.eventType, entry.payload);
+              break;
+            case "campaign_cancelled":
               await this.publishQueue.add(entry.eventType, entry.payload);
               break;
             default:

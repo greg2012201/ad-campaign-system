@@ -21,4 +21,9 @@ export class CampaignsController {
   async findById(@Param("id") id: string) {
     return this.campaignsService.findById(id);
   }
+
+  @Post(":id/cancel")
+  async cancel(@Param("id") id: string) {
+    return this.campaignsService.cancel(id);
+  }
 }

@@ -92,4 +92,36 @@ export class CampaignsService {
 
     return campaign;
   }
+
+  async cancel(id: string) {
+    const campaign = await this.campaignRepository.findOne({
+      where: { id },
+    });
+
+    if (!campaign) {
+      throw new NotFoundException(`Campaign with id ${id} not found`);
+    }
+
+    await this.dataSource.transaction(async (manager) => {
+      campaign.status = CampaignStatusEnum.CANCELLED;
+      await manager.save(CampaignEntity, campaign);
+
+      const outboxEntry = manager.create(OutboxEntity, {
+        aggregateType: "campaign",
+        aggregateId: campaign.id,
+        eventType: "campaign_cancelled",
+        payload: {
+          campaignId: campaign.id,
+          version: campaign.version,
+        },
+      });
+
+      await manager.save(OutboxEntity, outboxEntry);
+    });
+
+    return this.campaignRepository.findOne({
+      where: { id },
+      relations: ["assets"],
+    });
+  }
 }
