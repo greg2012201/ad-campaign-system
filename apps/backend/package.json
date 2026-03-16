@@ -4,10 +4,11 @@
   "private": true,
   "scripts": {
     "start:dev": "nest start --watch",
+    "debug": "NODE_OPTIONS='--inspect=9229 --enable-source-maps' nest start --watch",
     "build": "nest build",
     "start:prod": "node dist/main.js",
     "typeorm": "typeorm-ts-node-commonjs",
-    "migration:generate": "typeorm-ts-node-commonjs migration:generate -d src/database/data-source.ts",
+    "migration:generate": "typeorm-ts-node-commonjs migration:generate src/database/migrations/$npm_config_name -d src/database/data-source.ts",
     "migration:run": "typeorm-ts-node-commonjs migration:run -d src/database/data-source.ts",
     "migration:revert": "typeorm-ts-node-commonjs migration:revert -d src/database/data-source.ts",
     "seed": "ts-node src/database/seed.ts"
