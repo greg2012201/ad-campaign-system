@@ -1,3 +1,4 @@
+import { resolve } from "path";
 import { Module } from "@nestjs/common";
 import { BullModule } from "@nestjs/bullmq";
 import { ConfigModule, ConfigService } from "@nestjs/config";
@@ -9,7 +10,10 @@ import { TemplateWorkerModule } from "./template-worker/template-worker.module";
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: resolve(__dirname, "..", "..", "..", ".env"),
+    }),
     ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
