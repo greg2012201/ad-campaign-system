@@ -4,10 +4,16 @@
   "scripts": {
     "dev:infra": "./scripts/infra-up.sh",
     "dev:api": "pnpm --filter backend run start:dev",
+    "debug:api": "pnpm --filter backend run debug",
     "dev:ui": "pnpm --filter @campaign-system/admin-ui run dev",
     "dev:screen": "pnpm --filter screen-client run dev",
     "infra:down": "./scripts/infra-down.sh",
     "health": "./scripts/health-check.sh"
+  },
+  "pnpm": {
+    "overrides": {
+      "zod": "^4.3.6"
+    }
   },
   "devDependencies": {
     "typescript": "^5.7.0"
