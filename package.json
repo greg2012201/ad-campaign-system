@@ -8,7 +8,8 @@
     "dev:ui": "pnpm --filter @campaign-system/admin-ui run dev",
     "dev:screen": "pnpm --filter screen-client run dev",
     "infra:down": "./scripts/infra-down.sh",
-    "health": "./scripts/health-check.sh"
+    "health": "./scripts/health-check.sh",
+    "dev": "./scripts/dev.sh"
   },
   "pnpm": {
     "overrides": {
@@ -16,6 +17,7 @@
     }
   },
   "devDependencies": {
+    "concurrently": "^9.2.1",
     "typescript": "^5.7.0"
   }
 }

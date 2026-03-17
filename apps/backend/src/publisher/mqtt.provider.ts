@@ -13,6 +13,13 @@ type PublishParams = {
   qos?: 0 | 1 | 2;
 };
 
+type SubscribeParams = {
+  topic: string;
+  qos?: 0 | 1 | 2;
+};
+
+type MessageHandler = (topic: string, payload: Buffer) => void;
+
 @Injectable()
 export class MqttProvider implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(MqttProvider.name);
@@ -63,5 +70,22 @@ export class MqttProvider implements OnModuleInit, OnModuleDestroy {
 
   getClient() {
     return this.client;
+  }
+
+  subscribe({ topic, qos = 1 }: SubscribeParams) {
+    return new Promise<void>((resolve, reject) => {
+      this.client.subscribe(topic, { qos }, (error) => {
+        if (error) {
+          reject(error);
+        } else {
+          this.logger.log(`Subscribed to ${topic}`);
+          resolve();
+        }
+      });
+    });
+  }
+
+  onMessage(handler: MessageHandler) {
+    this.client.on("message", handler);
   }
 }

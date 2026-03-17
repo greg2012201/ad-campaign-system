@@ -8,6 +8,7 @@ import { CampaignsModule } from "./campaigns/campaigns.module";
 import { OutboxModule } from "./outbox/outbox.module";
 import { TemplateWorkerModule } from "./template-worker/template-worker.module";
 import { PublisherModule } from "./publisher/publisher.module";
+import { AckConsumerModule } from "./ack-consumer/ack-consumer.module";
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { PublisherModule } from "./publisher/publisher.module";
     OutboxModule,
     TemplateWorkerModule,
     PublisherModule,
+    AckConsumerModule,
   ],
   controllers: [],
   providers: [],

@@ -5,7 +5,7 @@ import { CampaignEntity } from "../campaigns/campaign.entity";
 import { CampaignAssetEntity } from "../campaigns/campaign-asset.entity";
 import { DeviceEntity } from "../devices/device.entity";
 import { PublisherProcessor } from "./publisher.processor";
-import { MqttProvider } from "./mqtt.provider";
+import { MqttModule } from "./mqtt.module";
 
 @Module({
   imports: [
@@ -15,7 +15,7 @@ import { MqttProvider } from "./mqtt.provider";
       DeviceEntity,
     ]),
     BullModule.registerQueue({ name: "publish" }),
-    MqttProvider,
+    MqttModule,
   ],
   providers: [PublisherProcessor],
 })
