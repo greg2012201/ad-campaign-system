@@ -1,0 +1,21 @@
+{
+  "name": "tests",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "e2e": "playwright test --config e2e/playwright.config.ts"
+  },
+  "dependencies": {
+    "@playwright/test": "^1.52.0",
+    "testcontainers": "^10.25.0",
+    "@testcontainers/postgresql": "^10.25.0",
+    "mqtt": "^5.0.0",
+    "pg": "^8.13.0",
+    "dotenv": "^17.3.1"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.11.0",
+    "typescript": "^5.7.0"
+  }
+}
