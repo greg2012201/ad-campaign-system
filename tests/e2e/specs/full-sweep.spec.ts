@@ -277,13 +277,21 @@ test.describe(`@sweep full-system integration sweep (${profile.name})`, () => {
     const cancelledCampaign = await cancelResponse.json();
     expect(cancelledCampaign.status).toBe("cancelled");
 
+    const deviceIdSet = new Set(deviceIds);
+
     await mqttHelper.waitForMessages({
       count: deviceIds.length,
       timeout: 30_000,
-      filter: (topic: string, payload: Record<string, unknown>) =>
-        topic.endsWith("/control") &&
-        payload.type === "revoke" &&
-        payload.campaignId === campaignToCancel.id,
+      filter: (topic: string, payload: Record<string, unknown>) => {
+        const parts = topic.split("/");
+        return (
+          parts[0] === "devices" &&
+          parts[2] === "control" &&
+          deviceIdSet.has(parts[1]!) &&
+          payload.type === "revoke" &&
+          payload.campaignId === campaignToCancel.id
+        );
+      },
     });
 
     const revokeMessages = mqttHelper.getMessages();

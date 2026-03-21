@@ -10,7 +10,9 @@ test.describe("campaign creation", () => {
   test("creates a campaign via the UI form and verifies it appears in the table", async ({
     page,
   }) => {
-    const campaignData = createTestCampaign({ name: "UI Creation Test" });
+    const campaignData = createTestCampaign({
+      name: `UI Creation Test ${Date.now()}`,
+    });
 
     await page.goto("/");
     await expect(
@@ -37,14 +39,18 @@ test.describe("campaign creation", () => {
       page.getByRole("cell", { name: campaignData.name }),
     ).toBeVisible({ timeout: 10000 });
 
-    await expect(page.getByRole("cell", { name: "draft" })).toBeVisible();
+    await expect(
+      page.getByRole("cell", { name: "draft" }).first(),
+    ).toBeVisible();
   });
 
   test("creates a campaign via the UI and verifies it via the API", async ({
     page,
     request,
   }) => {
-    const campaignData = createTestCampaign({ name: "API Verify Test" });
+    const campaignData = createTestCampaign({
+      name: `API Verify Test ${Date.now()}`,
+    });
 
     await page.goto("/");
 
@@ -101,10 +107,11 @@ test.describe("campaign creation", () => {
     await page.getByRole("button", { name: "Add Asset" }).click();
 
     const urlInputs = page.getByPlaceholder("Asset URL");
+    await expect(urlInputs).toHaveCount(2);
     await urlInputs.nth(1).fill("https://example.com/video.mp4");
 
-    const selects = page.locator("select");
-    await selects.nth(1).selectOption("video");
+    const assetTypeSelects = page.getByRole("combobox");
+    await assetTypeSelects.nth(1).selectOption("video");
 
     await page.getByRole("button", { name: "Create Campaign" }).click();
 
