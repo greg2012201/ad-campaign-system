@@ -9,6 +9,7 @@ import type { ChildProcess } from "child_process";
 
 const API_PORT = 3100;
 const UI_PORT = 5200;
+const SCREEN_PORT = 5174;
 const ROOT_DIR = path.resolve(import.meta.dirname, "../..");
 const ENV_TEST_PATH = path.join(ROOT_DIR, ".env.test");
 
@@ -136,26 +137,43 @@ async function globalSetup(_config: FullConfig) {
     },
   });
 
+  const screenClientProcess = spawnApp({
+    command: "pnpm",
+    args: ["exec", "vite", "--port", String(SCREEN_PORT)],
+    cwd: path.join(ROOT_DIR, "apps/screen-client"),
+    env: {
+      ...process.env,
+    },
+  });
+
   await Promise.all([
     waitForUrl(`http://localhost:${API_PORT}`),
     waitForUrl(`http://localhost:${UI_PORT}`),
+    waitForUrl(`http://localhost:${SCREEN_PORT}`),
   ]);
   console.log("[e2e] Apps started and healthy");
 
   process.env["E2E_API_URL"] = `http://localhost:${API_PORT}`;
   process.env["E2E_UI_URL"] = `http://localhost:${UI_PORT}`;
+  process.env["E2E_SCREEN_URL"] = `http://localhost:${SCREEN_PORT}`;
   process.env["E2E_MQTT_WS_URL"] = connections.mqtt.wsUrl;
+  process.env["E2E_MQTT_TCP_URL"] = connections.mqtt.tcpUrl;
 
   setState({
     containers,
     connections,
-    processes: { backend: backendProcess, adminUi: adminUiProcess },
-    ports: { api: API_PORT, ui: UI_PORT },
+    processes: {
+      backend: backendProcess,
+      adminUi: adminUiProcess,
+      screenClient: screenClientProcess,
+    },
+    ports: { api: API_PORT, ui: UI_PORT, screen: SCREEN_PORT },
   });
 
   process.on("exit", () => {
     killProcess(backendProcess);
     killProcess(adminUiProcess);
+    killProcess(screenClientProcess);
   });
 }
 

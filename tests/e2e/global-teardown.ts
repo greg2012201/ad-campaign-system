@@ -21,6 +21,7 @@ async function globalTeardown() {
 
   killProcess(state.processes.backend);
   killProcess(state.processes.adminUi);
+  killProcess(state.processes.screenClient);
   console.log("[e2e] App processes stopped");
 
   await stopContainers(state.containers);

@@ -18,7 +18,9 @@
     "test:load:medium": "pnpm build:load && docker run --rm --network host -v ./tests/load:/scripts -i grafana/k6 run --config /scripts/config/medium.json /scripts/dist/campaign-api.js",
     "test:load:large": "pnpm build:load && docker run --rm --network host -v ./tests/load:/scripts -i grafana/k6 run --config /scripts/config/large.json /scripts/dist/campaign-api.js",
     "test:load:mqtt": "pnpm build:load && docker run --rm --network host -v ./tests/load:/scripts -i grafana/k6 run --config /scripts/config/small.json /scripts/dist/mqtt-fanout.js",
-    "test:load:full": "pnpm build:load && docker run --rm --network host -v ./tests/load:/scripts -i grafana/k6 run --config /scripts/config/small.json /scripts/dist/full-flow.js"
+    "test:load:full": "pnpm build:load && docker run --rm --network host -v ./tests/load:/scripts -i grafana/k6 run --config /scripts/config/small.json /scripts/dist/full-flow.js",
+    "test:sweep": "E2E_SWEEP_PROFILE=small pnpm --filter tests run e2e -- --grep @sweep",
+    "test:sweep:large": "E2E_SWEEP_PROFILE=large pnpm --filter tests run e2e -- --grep @sweep"
   },
   "pnpm": {
     "overrides": {

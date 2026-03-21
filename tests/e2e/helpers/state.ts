@@ -7,10 +7,12 @@ type TestState = {
   processes: {
     backend: ChildProcess;
     adminUi: ChildProcess;
+    screenClient: ChildProcess;
   };
   ports: {
     api: number;
     ui: number;
+    screen: number;
   };
 };
 
