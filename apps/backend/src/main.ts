@@ -20,8 +20,9 @@ async function bootstrap() {
     }),
   );
 
+  const corsOrigin = process.env["API_CORS_ORIGIN"] || "http://localhost:5173";
   app.enableCors({
-    origin: process.env["ADMIN_UI_URL"] || "http://localhost:5173",
+    origin: corsOrigin.split(",").map((o) => o.trim()),
     credentials: true,
   });
 
