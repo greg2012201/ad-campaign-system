@@ -4,7 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "e2e": "playwright test --config e2e/playwright.config.ts"
+    "e2e": "playwright test --config e2e/playwright.config.ts",
+    "e2e:ui": "playwright test --config e2e/playwright.config.ts --ui",
+    "e2e:debug": "PWDEBUG=1 playwright test --config e2e/playwright.config.ts",
+    "e2e:trace": "E2E_TRACE=on playwright test --config e2e/playwright.config.ts"
   },
   "dependencies": {
     "@playwright/test": "^1.52.0",
