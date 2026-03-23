@@ -1,6 +1,7 @@
 {
   "name": "@campaign-system/shared",
   "version": "0.0.0",
+  "type": "module",
   "main": "./dist/index.js",
   "types": "./src/index.ts",
   "exports": {
