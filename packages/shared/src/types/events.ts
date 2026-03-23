@@ -2,6 +2,7 @@ export type EventType =
   | "INSTALL_ACK"
   | "DISPLAY_START"
   | "DISPLAY_COMPLETE"
+  | "REVOKE_ACK"
   | "ERROR";
 
 type BaseEvent = {
@@ -23,6 +24,10 @@ export type DisplayStart = BaseEvent & {
 
 export type DisplayComplete = BaseEvent & {
   eventType: "DISPLAY_COMPLETE";
+};
+
+export type RevokeAck = BaseEvent & {
+  eventType: "REVOKE_ACK";
 };
 
 export type ErrorEvent = BaseEvent & {

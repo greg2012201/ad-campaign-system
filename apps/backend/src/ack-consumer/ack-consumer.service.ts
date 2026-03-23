@@ -26,6 +26,7 @@ const EVENT_TYPE_MAP: Record<AckEvent["eventType"], DeliveryEventTypeEnum> = {
   [EVENT_TYPES.INSTALL_ACK]: DeliveryEventTypeEnum.INSTALL_ACK,
   [EVENT_TYPES.DISPLAY_START]: DeliveryEventTypeEnum.DISPLAY_START,
   [EVENT_TYPES.DISPLAY_COMPLETE]: DeliveryEventTypeEnum.DISPLAY_COMPLETE,
+  [EVENT_TYPES.REVOKE_ACK]: DeliveryEventTypeEnum.REVOKE_ACK,
   [EVENT_TYPES.ERROR]: DeliveryEventTypeEnum.ERROR,
 };
 

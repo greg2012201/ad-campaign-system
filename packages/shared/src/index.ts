@@ -13,6 +13,7 @@ export type {
   InstallAck,
   DisplayStart,
   DisplayComplete,
+  RevokeAck,
   ErrorEvent,
 } from "./types/events.js";
 

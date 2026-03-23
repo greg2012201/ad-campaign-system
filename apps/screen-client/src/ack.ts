@@ -5,6 +5,7 @@ import {
   type InstallAck,
   type DisplayStart,
   type DisplayComplete,
+  type RevokeAck,
 } from "@campaign-system/shared";
 
 type AckEventParams = {
@@ -18,6 +19,7 @@ type RevokeAckParams = {
   client: MqttClient;
   deviceId: string;
   campaignId: string;
+  version: number;
 };
 
 function publishInstallAck({
@@ -71,12 +73,13 @@ function publishDisplayComplete({
   client.publish(TOPICS.ACKS(deviceId), JSON.stringify(event), { qos: 1 });
 }
 
-function publishRevokeAck({ client, deviceId, campaignId }: RevokeAckParams) {
-  const event = {
+function publishRevokeAck({ client, deviceId, campaignId, version }: RevokeAckParams) {
+  const event: RevokeAck = {
     eventId: crypto.randomUUID(),
-    eventType: "REVOKE_ACK",
+    eventType: EVENT_TYPES.REVOKE_ACK,
     deviceId,
     campaignId,
+    version,
     timestamp: Date.now(),
   };
   client.publish(TOPICS.ACKS(deviceId), JSON.stringify(event), { qos: 1 });

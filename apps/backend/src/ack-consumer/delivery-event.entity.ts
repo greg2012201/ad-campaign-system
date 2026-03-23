@@ -14,6 +14,7 @@ export enum DeliveryEventTypeEnum {
   INSTALL_ACK = "install_ack",
   DISPLAY_START = "display_start",
   DISPLAY_COMPLETE = "display_complete",
+  REVOKE_ACK = "revoke_ack",
   ERROR = "error",
 }
 

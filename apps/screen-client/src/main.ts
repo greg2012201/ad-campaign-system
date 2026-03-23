@@ -83,9 +83,15 @@ async function handleControl(
   console.log(`[main] received control message: ${message.type}`);
 
   if (message.type === "revoke") {
+    const manifest = await getManifestByCampaign(message.campaignId);
     cancelScheduled(message.campaignId);
     await deleteCampaign(message.campaignId);
-    publishRevokeAck({ client, deviceId, campaignId: message.campaignId });
+    publishRevokeAck({
+      client,
+      deviceId,
+      campaignId: message.campaignId,
+      version: manifest?.version ?? 0,
+    });
     console.log(`[main] revoked campaign ${message.campaignId}`);
   }
 }
