@@ -8,6 +8,7 @@ storage/
 .env
 .env.local
 .env.*.local
+.env.k6
 
 *.log
 npm-debug.log*
@@ -24,7 +25,6 @@ Thumbs.db
 *.tsbuildinfo
 
 docker-data/
-
-PLAN.md
-notes/
+test-results/
+playwright-report/
 
