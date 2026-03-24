@@ -2,17 +2,17 @@ import { test, expect } from "@playwright/test";
 import pg from "pg";
 import { config } from "dotenv";
 import path from "path";
-import { getProfile } from "../helpers/sweep-profiles.js";
+import { getProfile } from "../helpers/sweep-profiles";
 import {
   seedSweepDevices,
   createSweepCampaigns,
   cleanupSweepData,
-} from "../helpers/sweep-seed.js";
+} from "../helpers/sweep-seed";
 import {
   MqttTestHelper,
   createAckPayload,
-} from "../helpers/mqtt-helper.js";
-import type { SweepCampaign, DbConfig } from "../helpers/sweep-seed.js";
+} from "../helpers/mqtt-helper";
+import type { SweepCampaign, DbConfig } from "../helpers/sweep-seed";
 
 const ENV_TEST_PATH = path.resolve(
   import.meta.dirname,

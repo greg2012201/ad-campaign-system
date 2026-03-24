@@ -1,9 +1,9 @@
 import { spawn } from "child_process";
 import path from "path";
 import { writeFile } from "fs/promises";
-import { startContainers } from "./helpers/containers.js";
-import { runMigrations, seedDevices } from "./helpers/db.js";
-import { setState } from "./helpers/state.js";
+import { startContainers } from "./helpers/containers";
+import { runMigrations, seedDevices } from "./helpers/db";
+import { setState } from "./helpers/state";
 import type { FullConfig } from "@playwright/test";
 import type { ChildProcess } from "child_process";
 

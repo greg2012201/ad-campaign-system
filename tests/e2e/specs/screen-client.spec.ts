@@ -3,7 +3,7 @@ import {
   MqttTestHelper,
   createManifestPayload,
   createControlPayload,
-} from "../helpers/mqtt-helper.js";
+} from "../helpers/mqtt-helper";
 
 const SCREEN_URL = process.env["E2E_SCREEN_URL"] || "http://localhost:5174";
 const MQTT_TCP_URL = process.env["E2E_MQTT_TCP_URL"] || "mqtt://localhost:1883";

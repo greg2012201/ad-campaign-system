@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import pg from "pg";
-import { createTestCampaign } from "../fixtures/test-campaign.js";
-import { MqttTestHelper, createAckPayload } from "../helpers/mqtt-helper.js";
+import { createTestCampaign } from "../fixtures/test-campaign";
+import { MqttTestHelper, createAckPayload } from "../helpers/mqtt-helper";
 
 const API_URL = process.env["E2E_API_URL"] || "http://localhost:3100";
 const MQTT_URL = process.env["E2E_MQTT_WS_URL"] || "ws://localhost:9001";

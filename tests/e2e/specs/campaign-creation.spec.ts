@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import {
   createTestCampaign,
   formatDateForInput,
-} from "../fixtures/test-campaign.js";
+} from "../fixtures/test-campaign";
 
 const API_URL = process.env["E2E_API_URL"] || "http://localhost:3100";
 

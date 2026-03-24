@@ -1,8 +1,8 @@
 import { unlink } from "fs/promises";
 import path from "path";
-import { getState } from "./helpers/state.js";
-import { stopContainers } from "./helpers/containers.js";
-import { killProcess } from "./global-setup.js";
+import { getState } from "./helpers/state";
+import { stopContainers } from "./helpers/containers";
+import { killProcess } from "./global-setup";
 
 const ENV_TEST_PATH = path.resolve(import.meta.dirname, "../../.env.test");
 

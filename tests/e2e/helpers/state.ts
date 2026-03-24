@@ -1,5 +1,5 @@
 import type { ChildProcess } from "child_process";
-import type { ContainerSet, ConnectionDetails } from "./containers.js";
+import type { ContainerSet, ConnectionDetails } from "./containers";
 
 type TestState = {
   containers: ContainerSet;
