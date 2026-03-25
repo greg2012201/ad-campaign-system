@@ -12,6 +12,19 @@ import {
 import { DeviceEntity } from "../devices/device.entity";
 import { MqttProvider } from "./mqtt.provider";
 
+const BATCH_SIZE = 200;
+
+type PublishToDevicesParams = {
+  devices: DeviceEntity[];
+  buildTopic: (deviceId: string) => string;
+  payload: string;
+};
+
+type BatchResult = {
+  successCount: number;
+  failureCount: number;
+};
+
 @Injectable()
 @Processor("publish")
 export class PublisherProcessor extends WorkerHost {
@@ -50,9 +63,7 @@ export class PublisherProcessor extends WorkerHost {
       status: CampaignStatusEnum.PUBLISHING,
     });
 
-    const devices = await this.dataSource
-      .getRepository(DeviceEntity)
-      .find();
+    const devices = await this.dataSource.getRepository(DeviceEntity).find();
 
     const apiBaseUrl = "http://localhost:3000";
 
@@ -70,59 +81,72 @@ export class PublisherProcessor extends WorkerHost {
       })),
     };
 
-    const payload = JSON.stringify(manifest);
-
-    for (const device of devices) {
-      try {
-        await this.mqttProvider.publish({
-          topic: TOPICS.NOTIFICATIONS(device.deviceId),
-          payload,
-          qos: 1,
-        });
-      } catch (error) {
-        this.logger.error(
-          `Failed to publish to device ${device.deviceId}: ${error}`,
-        );
-      }
-    }
+    const { successCount, failureCount } =
+      await this.publishToDevicesInBatches({
+        devices,
+        buildTopic: (deviceId) => TOPICS.NOTIFICATIONS(deviceId),
+        payload: JSON.stringify(manifest),
+      });
 
     await this.dataSource.getRepository(CampaignEntity).update(campaignId, {
       status: CampaignStatusEnum.ACTIVE,
     });
 
     this.logger.log(
-      `Campaign ${campaignId} published to ${devices.length} devices`,
+      `Campaign ${campaignId} published to ${devices.length} devices — success: ${successCount}, failed: ${failureCount}`,
     );
   }
 
   private async handleCancel(job: Job) {
     const { campaignId } = job.data;
 
-    const devices = await this.dataSource
-      .getRepository(DeviceEntity)
-      .find();
+    const devices = await this.dataSource.getRepository(DeviceEntity).find();
 
-    const controlPayload = JSON.stringify({
-      type: "revoke",
-      campaignId,
-    });
-
-    for (const device of devices) {
-      try {
-        await this.mqttProvider.publish({
-          topic: TOPICS.CONTROL(device.deviceId),
-          payload: controlPayload,
-          qos: 1,
-        });
-      } catch (error) {
-        this.logger.error(
-          `Failed to send revoke to device ${device.deviceId}: ${error}`,
-        );
-      }
-    }
+    const { successCount, failureCount } =
+      await this.publishToDevicesInBatches({
+        devices,
+        buildTopic: (deviceId) => TOPICS.CONTROL(deviceId),
+        payload: JSON.stringify({ type: "revoke", campaignId }),
+      });
 
     this.logger.log(
-      `Campaign ${campaignId} revoke sent to ${devices.length} devices`,
+      `Campaign ${campaignId} revoke sent to ${devices.length} devices — success: ${successCount}, failed: ${failureCount}`,
     );
+  }
+
+  private async publishToDevicesInBatches({
+    devices,
+    buildTopic,
+    payload,
+  }: PublishToDevicesParams): Promise<BatchResult> {
+    let successCount = 0;
+    let failureCount = 0;
+
+    for (let i = 0; i < devices.length; i += BATCH_SIZE) {
+      const batch = devices.slice(i, i + BATCH_SIZE);
+
+      const results = await Promise.allSettled(
+        batch.map((device) =>
+          this.mqttProvider.publishWithTimeout({
+            topic: buildTopic(device.deviceId),
+            payload,
+            qos: 1,
+          }),
+        ),
+      );
+
+      results.forEach((result, j) => {
+        if (result.status === "fulfilled") {
+          successCount++;
+        } else {
+          failureCount++;
+          this.logger.error(
+            `Failed to publish to device ${batch[j]?.deviceId}: ${result.reason}`,
+          );
+        }
+      });
+    }
+
+    return { successCount, failureCount };
   }
 }
