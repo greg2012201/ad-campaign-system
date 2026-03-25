@@ -32,6 +32,13 @@ type CampaignListResponse = {
   total: number
   offset: number
   limit: number
+  page: number
+  totalPages: number
+}
+
+type FetchCampaignsParams = {
+  page: number
+  limit: number
 }
 
 type CreateCampaignPayload = {
@@ -65,8 +72,16 @@ async function apiFetch<T>(path: string, options?: RequestInit) {
   return response.json() as Promise<T>
 }
 
-async function fetchCampaigns() {
-  return apiFetch<CampaignListResponse>("/campaigns")
+async function fetchCampaigns({ page, limit }: FetchCampaignsParams) {
+  const offset = (page - 1) * limit
+  const data = await apiFetch<CampaignListResponse>(
+    `/campaigns?offset=${offset}&limit=${limit}`
+  )
+  return {
+    ...data,
+    page,
+    totalPages: Math.ceil(data.total / limit),
+  }
 }
 
 async function createCampaign(payload: CreateCampaignPayload) {
@@ -82,4 +97,5 @@ export type {
   AssetResponse,
   CampaignListResponse,
   CreateCampaignPayload,
+  FetchCampaignsParams,
 }

@@ -1,3 +1,5 @@
+import { useState } from "react"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 import { useCampaigns } from "@/hooks/use-campaigns"
 import {
   Table,
@@ -14,6 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 
 type StatusVariant = "default" | "secondary" | "destructive" | "outline"
 
@@ -27,6 +30,8 @@ const STATUS_VARIANT_MAP: Record<string, StatusVariant> = {
   cancelled: "destructive",
 }
 
+const PAGE_SIZE = 20
+
 function formatDate(value: number | string) {
   const date = new Date(typeof value === "string" ? Number(value) : value)
   if (Number.isNaN(date.getTime())) return "-"
@@ -37,7 +42,11 @@ function formatDate(value: number | string) {
 }
 
 function CampaignTable() {
-  const { data, isLoading, isError, error } = useCampaigns()
+  const [page, setPage] = useState(1)
+  const { data, isLoading, isError, error, isPlaceholderData } = useCampaigns({
+    page,
+    limit: PAGE_SIZE,
+  })
 
   if (isLoading) {
     return (
@@ -70,8 +79,10 @@ function CampaignTable() {
   }
 
   const campaigns = data?.data ?? []
+  const totalPages = data?.totalPages ?? 1
+  const total = data?.total ?? 0
 
-  if (campaigns.length === 0) {
+  if (campaigns.length === 0 && page === 1) {
     return (
       <Card>
         <CardHeader>
@@ -91,7 +102,7 @@ function CampaignTable() {
       <CardHeader>
         <CardTitle>Campaigns</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-4">
         <Table>
           <TableHeader>
             <TableRow>
@@ -122,6 +133,32 @@ function CampaignTable() {
             ))}
           </TableBody>
         </Table>
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            {total} {total === 1 ? "campaign" : "campaigns"} total
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon-sm"
+              disabled={page <= 1}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+            >
+              <ChevronLeft />
+            </Button>
+            <span className="text-sm tabular-nums">
+              {page} / {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="icon-sm"
+              disabled={page >= totalPages || isPlaceholderData}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              <ChevronRight />
+            </Button>
+          </div>
+        </div>
       </CardContent>
     </Card>
   )
