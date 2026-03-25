@@ -28,7 +28,7 @@ import { AckConsumerModule } from "./ack-consumer/ack-consumer.module";
         database: config.get<string>("POSTGRES_DB", "campaign"),
         autoLoadEntities: true,
         synchronize: false,
-        logging: true,
+        logging: false,
       }),
     }),
     BullModule.forRootAsync({
