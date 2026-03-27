@@ -1,6 +1,7 @@
-import { useState } from "react"
-import { ChevronLeft, ChevronRight } from "lucide-react"
-import { useCampaigns } from "@/hooks/use-campaigns"
+import { useState } from "react";
+import { ChevronLeft, ChevronRight, CircleX } from "lucide-react";
+import { useCampaigns } from "@/hooks/use-campaigns";
+import { useCancelCampaign } from "@/hooks/use-cancel-campaign";
 import {
   Table,
   TableBody,
@@ -8,17 +9,12 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
-type StatusVariant = "default" | "secondary" | "destructive" | "outline"
+type StatusVariant = "default" | "secondary" | "destructive" | "outline";
 
 const STATUS_VARIANT_MAP: Record<string, StatusVariant> = {
   draft: "secondary",
@@ -28,25 +24,26 @@ const STATUS_VARIANT_MAP: Record<string, StatusVariant> = {
   active: "default",
   completed: "secondary",
   cancelled: "destructive",
-}
+};
 
-const PAGE_SIZE = 20
+const PAGE_SIZE = 20;
 
 function formatDate(value: number | string) {
-  const date = new Date(typeof value === "string" ? Number(value) : value)
-  if (Number.isNaN(date.getTime())) return "-"
+  const date = new Date(typeof value === "string" ? Number(value) : value);
+  if (Number.isNaN(date.getTime())) return "-";
   return new Intl.DateTimeFormat("en-US", {
     dateStyle: "medium",
     timeStyle: "short",
-  }).format(date)
+  }).format(date);
 }
 
 function CampaignTable() {
-  const [page, setPage] = useState(1)
+  const [page, setPage] = useState(1);
   const { data, isLoading, isError, error, isPlaceholderData } = useCampaigns({
     page,
     limit: PAGE_SIZE,
-  })
+  });
+  const cancelCampaign = useCancelCampaign();
 
   if (isLoading) {
     return (
@@ -55,12 +52,10 @@ function CampaignTable() {
           <CardTitle>Campaigns</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">
-            Loading campaigns...
-          </p>
+          <p className="text-sm text-muted-foreground">Loading campaigns...</p>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   if (isError) {
@@ -75,12 +70,12 @@ function CampaignTable() {
           </p>
         </CardContent>
       </Card>
-    )
+    );
   }
 
-  const campaigns = data?.data ?? []
-  const totalPages = data?.totalPages ?? 1
-  const total = data?.total ?? 0
+  const campaigns = data?.data ?? [];
+  const totalPages = data?.totalPages ?? 1;
+  const total = data?.total ?? 0;
 
   if (campaigns.length === 0 && page === 1) {
     return (
@@ -94,7 +89,7 @@ function CampaignTable() {
           </p>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
@@ -112,6 +107,7 @@ function CampaignTable() {
               <TableHead>Expire At</TableHead>
               <TableHead>Version</TableHead>
               <TableHead>Created At</TableHead>
+              <TableHead className="w-[50px]" />
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -129,6 +125,18 @@ function CampaignTable() {
                 <TableCell>{formatDate(campaign.expireAt)}</TableCell>
                 <TableCell>{campaign.version}</TableCell>
                 <TableCell>{formatDate(campaign.createdAt)}</TableCell>
+                <TableCell>
+                  {campaign.status !== "cancelled" && (
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      disabled={cancelCampaign.isPending}
+                      onClick={() => cancelCampaign.mutate(campaign.id)}
+                    >
+                      <CircleX className="text-muted-foreground" />
+                    </Button>
+                  )}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -161,7 +169,7 @@ function CampaignTable() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
 
-export { CampaignTable }
+export { CampaignTable };

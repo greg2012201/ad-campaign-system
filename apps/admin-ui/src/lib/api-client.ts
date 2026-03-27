@@ -55,10 +55,12 @@ type CreateCampaignPayload = {
 }
 
 async function apiFetch<T>(path: string, options?: RequestInit) {
+  const headers: HeadersInit = options?.body
+    ? { "Content-Type": "application/json" }
+    : {}
+
   const response = await fetch(`${API_BASE_URL}${path}`, {
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers,
     ...options,
   })
 
@@ -91,7 +93,13 @@ async function createCampaign(payload: CreateCampaignPayload) {
   })
 }
 
-export { fetchCampaigns, createCampaign }
+async function cancelCampaign(id: string) {
+  return apiFetch<CampaignResponse>(`/campaigns/${id}/cancel`, {
+    method: "POST",
+  })
+}
+
+export { fetchCampaigns, createCampaign, cancelCampaign }
 export type {
   CampaignResponse,
   AssetResponse,
