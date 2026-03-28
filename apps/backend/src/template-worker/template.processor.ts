@@ -55,15 +55,26 @@ export class TemplateProcessor extends WorkerHost {
     await mkdir(dir, { recursive: true });
     await writeFile(join(dir, "index.html"), html);
 
-    await this.dataSource.getRepository(CampaignEntity).update(campaignId, {
-      status: CampaignStatusEnum.READY,
-    });
+    await this.dataSource.transaction(async (manager) => {
+      const campaignToUpdate = await manager.findOne(CampaignEntity, {
+        where: { id: campaignId },
+      });
 
-    await this.dataSource.getRepository(OutboxEntity).save({
-      aggregateType: "campaign",
-      aggregateId: campaignId,
-      eventType: "template_ready",
-      payload: { campaignId, version: campaign.version },
+      if (!campaignToUpdate) {
+        throw new Error(`Campaign ${campaignId} not found`);
+      }
+
+      campaignToUpdate.status = CampaignStatusEnum.READY;
+      await manager.save(CampaignEntity, campaignToUpdate);
+
+      const outboxEntry = manager.create(OutboxEntity, {
+        aggregateType: "campaign",
+        aggregateId: campaignId,
+        eventType: "template_ready",
+        payload: { campaignId, version: campaignToUpdate.version },
+      });
+
+      await manager.save(OutboxEntity, outboxEntry);
     });
 
     this.logger.log(
