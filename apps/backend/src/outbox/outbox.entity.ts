@@ -7,7 +7,7 @@ import {
 } from "typeorm";
 
 @Entity("outbox")
-@Index(["processed", "createdAt"])
+@Index(["processed", "lockedAt", "createdAt"])
 export class OutboxEntity {
   @PrimaryGeneratedColumn("uuid")
   id: string;
@@ -32,4 +32,10 @@ export class OutboxEntity {
 
   @Column({ type: "timestamptz", nullable: true })
   processedAt: Date | null;
+
+  @Column({ type: "text", nullable: true })
+  lockedBy: string | null;
+
+  @Column({ type: "timestamptz", nullable: true })
+  lockedAt: Date | null;
 }
