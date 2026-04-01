@@ -11,6 +11,7 @@ type PublishParams = {
   topic: string;
   payload: string | Buffer;
   qos?: 0 | 1 | 2;
+  retain?: boolean;
 };
 
 type PublishWithTimeoutParams = {
@@ -18,6 +19,7 @@ type PublishWithTimeoutParams = {
   payload: string | Buffer;
   qos?: 0 | 1 | 2;
   timeout?: number;
+  retain?: boolean;
 };
 
 type SubscribeParams = {
@@ -87,10 +89,10 @@ export class MqttProvider implements OnModuleInit, OnModuleDestroy {
     return client;
   }
 
-  publish({ topic, payload, qos = 1 }: PublishParams) {
+  publish({ topic, payload, qos = 1, retain = false }: PublishParams) {
     const client = this.getNextClient();
     return new Promise<void>((resolve, reject) => {
-      client.publish(topic, payload, { qos }, (error) => {
+      client.publish(topic, payload, { qos, retain }, (error) => {
         if (error) {
           reject(error);
         } else {
@@ -105,6 +107,7 @@ export class MqttProvider implements OnModuleInit, OnModuleDestroy {
     payload,
     qos = 1,
     timeout,
+    retain = false,
   }: PublishWithTimeoutParams) {
     const timeoutMs = timeout ?? this.publishTimeoutMs;
 
@@ -117,15 +120,15 @@ export class MqttProvider implements OnModuleInit, OnModuleDestroy {
         );
       }, timeoutMs);
 
-      this.publish({ topic, payload, qos })
-        .then(() => {
-          clearTimeout(timer);
-          resolve();
-        })
-        .catch((error) => {
-          clearTimeout(timer);
+      const client = this.getNextClient();
+      client.publish(topic, payload, { qos, retain }, (error) => {
+        clearTimeout(timer);
+        if (error) {
           reject(error);
-        });
+        } else {
+          resolve();
+        }
+      });
     });
   }
 
