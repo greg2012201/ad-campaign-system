@@ -17,7 +17,7 @@ export enum DeliveryEventTypeEnum {
   REVOKE_ACK = "revoke_ack",
   ERROR = "error",
 }
-
+@Index(["campaignId", "version", "eventType"])
 @Entity("delivery_events")
 export class DeliveryEventEntity {
   @PrimaryGeneratedColumn("uuid")
