@@ -73,6 +73,7 @@ export class VerifyDeliveryProcessor extends WorkerHost {
     const ackRows = await this.dataSource
       .getRepository(DeliveryEventEntity)
       .find({
+        select: { deviceId: true },
         where: {
           campaignId,
           version,
