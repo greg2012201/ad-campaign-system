@@ -93,5 +93,28 @@ function getCurrentCampaignId() {
   return currentCampaignId;
 }
 
-export { fetchTemplate, showCampaign, stopDisplay, getCurrentCampaignId };
+async function prefetchResources(manifest: Manifest) {
+  const cache = await caches.open(TEMPLATE_CACHE_NAME);
+  const urls = [manifest.templateUrl, ...manifest.assets.map((a) => a.url)];
+
+  await Promise.allSettled(
+    urls.map(async (url) => {
+      const cached = await cache.match(url);
+      if (cached) return;
+
+      const response = await fetch(url);
+      if (response.ok) {
+        await cache.put(url, response);
+      }
+    }),
+  );
+}
+
+export {
+  fetchTemplate,
+  prefetchResources,
+  showCampaign,
+  stopDisplay,
+  getCurrentCampaignId,
+};
 export type { DisplayCallbacks, ShowCampaignParams };
