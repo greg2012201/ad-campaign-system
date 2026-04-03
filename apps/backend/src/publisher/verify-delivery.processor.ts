@@ -12,7 +12,7 @@ import {
 import { DeviceStreamService } from "./device-stream.service";
 import { DevicePublishTracker } from "./device-publish-tracker";
 import { buildManifest } from "./build-manifest";
-import { MqttProvider } from "./mqtt.provider";
+import { MqttProvider } from "../mqtt/mqtt.provider";
 
 const BATCH_SIZE = 200;
 const VERIFY_DELAY_MS = 30_000;
