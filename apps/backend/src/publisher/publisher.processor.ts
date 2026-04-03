@@ -8,10 +8,10 @@ import {
   CampaignEntity,
   CampaignStatusEnum,
 } from "../campaigns/campaign.entity";
-import { MqttProvider } from "./mqtt.provider";
 import { DeviceStreamService } from "./device-stream.service";
 import { DevicePublishTracker } from "./device-publish-tracker";
 import { buildManifest } from "./build-manifest";
+import { MqttProvider } from "./mqtt.provider";
 
 const BATCH_SIZE = 200;
 

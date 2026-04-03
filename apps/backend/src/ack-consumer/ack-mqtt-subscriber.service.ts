@@ -1,6 +1,6 @@
 import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
-import { MqttProvider } from "../publisher/mqtt.provider";
 import { AckConsumerService, ackEventSchema } from "./ack-consumer.service";
+import { MqttProvider } from "../publisher/mqtt.provider";
 
 const ACK_TOPIC_PATTERN = "devices/+/acks";
 

@@ -11,7 +11,7 @@ import { VerifyDeliveryProcessor } from "./verify-delivery.processor";
 import { DeviceStreamService } from "./device-stream.service";
 import { DevicePublishTracker } from "./device-publish-tracker";
 import { PublishingRecoveryService } from "./publishing-recovery.service";
-import { MqttModule } from "./mqtt.module";
+import { MqttModule } from "../mqtt/mqtt.module";
 
 @Module({
   imports: [
