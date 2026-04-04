@@ -1,12 +1,9 @@
-import { Injectable, Logger } from "@nestjs/common";
-import { DataSource } from "typeorm";
+import { Injectable, Logger, OnModuleDestroy } from "@nestjs/common";
+import { InjectQueue } from "@nestjs/bullmq";
+import { Queue } from "bullmq";
 import { z } from "zod";
 import { EVENT_TYPES } from "@campaign-system/shared";
-import {
-  DeliveryEventEntity,
-  DeliveryEventTypeEnum,
-} from "./delivery-event.entity";
-import { DeviceEntity } from "../devices/device.entity";
+import { DeliveryEventTypeEnum } from "./delivery-event.entity";
 
 const eventTypes = Object.values(EVENT_TYPES);
 
@@ -20,9 +17,12 @@ export const ackEventSchema = z.object({
   payload: z.record(z.string(), z.unknown()).optional(),
 });
 
-type AckEvent = z.infer<typeof ackEventSchema>;
+export type AckEvent = z.infer<typeof ackEventSchema>;
 
-const EVENT_TYPE_MAP: Record<AckEvent["eventType"], DeliveryEventTypeEnum> = {
+export const EVENT_TYPE_MAP: Record<
+  AckEvent["eventType"],
+  DeliveryEventTypeEnum
+> = {
   [EVENT_TYPES.INSTALL_ACK]: DeliveryEventTypeEnum.INSTALL_ACK,
   [EVENT_TYPES.DISPLAY_START]: DeliveryEventTypeEnum.DISPLAY_START,
   [EVENT_TYPES.DISPLAY_COMPLETE]: DeliveryEventTypeEnum.DISPLAY_COMPLETE,
@@ -30,50 +30,70 @@ const EVENT_TYPE_MAP: Record<AckEvent["eventType"], DeliveryEventTypeEnum> = {
   [EVENT_TYPES.ERROR]: DeliveryEventTypeEnum.ERROR,
 };
 
+export const ACK_QUEUE_NAME = "ack-events-batch";
+
+const FLUSH_INTERVAL_MS = 500;
+const MAX_BUFFER_SIZE = 2000;
+
 @Injectable()
-export class AckConsumerService {
+export class AckConsumerService implements OnModuleDestroy {
   private readonly logger = new Logger(AckConsumerService.name);
+  private buffer: AckEvent[] = [];
+  private flushTimer: ReturnType<typeof setInterval>;
 
-  constructor(private readonly dataSource: DataSource) {}
+  constructor(
+    @InjectQueue(ACK_QUEUE_NAME) private readonly ackQueue: Queue,
+  ) {
+    this.flushTimer = setInterval(() => {
+      this.flush().catch((error) => {
+        this.logger.error(`Flush failed: ${error}`);
+      });
+    }, FLUSH_INTERVAL_MS);
+  }
 
-  async processEvent(event: AckEvent) {
+  async onModuleDestroy() {
+    clearInterval(this.flushTimer);
+    await this.flush();
+  }
+
+  bufferEvent(event: AckEvent) {
     const mappedEventType = EVENT_TYPE_MAP[event.eventType];
 
     if (!mappedEventType) {
-      this.logger.warn(
-        `Unknown event type: ${event.eventType}, discarding`,
-      );
+      this.logger.warn(`Unknown event type: ${event.eventType}, discarding`);
       return;
     }
 
+    this.buffer.push(event);
+
+    if (this.buffer.length >= MAX_BUFFER_SIZE) {
+      void this.flush();
+    }
+  }
+
+  private async flush() {
+    if (this.buffer.length === 0) return;
+
+    const events = this.buffer;
+    this.buffer = [];
+
     try {
-      await this.dataSource
-        .getRepository(DeliveryEventEntity)
-        .createQueryBuilder()
-        .insert()
-        .values({
-          eventId: event.eventId,
-          deviceId: event.deviceId,
-          campaignId: event.campaignId,
-          version: event.version,
-          eventType: mappedEventType,
-          payload: (event.payload ?? null) as any,
-        })
-        .orIgnore()
-        .execute();
-
-      await this.dataSource
-        .getRepository(DeviceEntity)
-        .update(event.deviceId, { lastSeen: new Date() });
-
-      this.logger.log(
-        `Processed ${event.eventType} from ${event.deviceId} for campaign ${event.campaignId}`,
+      await this.ackQueue.add(
+        "batch",
+        { events },
+        {
+          attempts: 3,
+          backoff: { type: "exponential", delay: 1000 },
+          removeOnComplete: true,
+          removeOnFail: 100,
+        },
       );
+      this.logger.debug(`Flushed ${events.length} events to queue`);
     } catch (error) {
       this.logger.error(
-        `Failed to process event ${event.eventId}: ${error}`,
+        `Failed to enqueue batch of ${events.length} events: ${error}`,
       );
-      throw error;
+      this.buffer = [...events, ...this.buffer];
     }
   }
 }

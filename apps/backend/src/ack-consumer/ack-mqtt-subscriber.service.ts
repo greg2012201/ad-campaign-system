@@ -49,8 +49,6 @@ export class AckMqttSubscriber implements OnModuleInit {
       return;
     }
 
-    this.ackConsumerService.processEvent(result.data).catch((error) => {
-      this.logger.error(`Error processing ack event: ${error}`);
-    });
+    this.ackConsumerService.bufferEvent(result.data);
   }
 }
