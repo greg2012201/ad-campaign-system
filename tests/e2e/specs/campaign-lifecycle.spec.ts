@@ -206,13 +206,13 @@ test.describe("campaign lifecycle", () => {
     await client.connect();
 
     const result = await client.query(
-      `SELECT * FROM delivery_events WHERE "campaignId" = $1 AND "deviceId" = $2 AND "eventType" = $3`,
+      `SELECT * FROM delivery_events WHERE "campaign_id" = $1 AND "device_id" = $2 AND "event_type" = $3`,
       [campaign.id, deviceId, "install_ack"],
     );
 
     expect(result.rows.length).toBe(1);
-    expect(result.rows[0].deviceId).toBe(deviceId);
-    expect(result.rows[0].campaignId).toBe(campaign.id);
+    expect(result.rows[0].device_id).toBe(deviceId);
+    expect(result.rows[0].campaign_id).toBe(campaign.id);
 
     await client.end();
     await mqttHelper.disconnect();
@@ -262,7 +262,7 @@ test.describe("campaign lifecycle", () => {
     await client.connect();
 
     const result = await client.query(
-      `SELECT * FROM delivery_events WHERE "campaignId" = $1 AND "deviceId" = $2 AND "eventType" = $3`,
+      `SELECT * FROM delivery_events WHERE "campaign_id" = $1 AND "device_id" = $2 AND "event_type" = $3`,
       [campaign.id, deviceId, "display_start"],
     );
 
@@ -315,12 +315,12 @@ test.describe("campaign lifecycle", () => {
     await client.connect();
 
     const result = await client.query(
-      `SELECT "lastSeen" FROM devices WHERE "deviceId" = $1`,
+      `SELECT "last_seen" FROM devices WHERE "device_id" = $1`,
       [deviceId],
     );
 
     expect(result.rows.length).toBe(1);
-    const lastSeen = new Date(result.rows[0].lastSeen);
+    const lastSeen = new Date(result.rows[0].last_seen);
     expect(lastSeen.getTime()).toBeGreaterThanOrEqual(beforeAck.getTime() - 1000);
 
     await client.end();

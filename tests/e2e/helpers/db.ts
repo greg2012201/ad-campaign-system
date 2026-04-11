@@ -66,9 +66,9 @@ async function seedDevices(config: DbConfig) {
 
   for (const device of devices) {
     await client.query(
-      `INSERT INTO devices ("deviceId", "groupId", "status", "metadata")
+      `INSERT INTO devices ("device_id", "group_id", "status", "metadata")
        VALUES ($1, $2, $3, $4)
-       ON CONFLICT ("deviceId") DO NOTHING`,
+       ON CONFLICT ("device_id") DO NOTHING`,
       [device.deviceId, device.groupId, device.status, device.metadata],
     );
   }

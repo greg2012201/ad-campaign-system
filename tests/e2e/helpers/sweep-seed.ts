@@ -51,9 +51,9 @@ async function seedSweepDevices({ dbConfig, count }: SeedDevicesParams) {
     deviceIds.push(deviceId);
 
     await client.query(
-      `INSERT INTO devices ("deviceId", "groupId", "status", "metadata")
+      `INSERT INTO devices ("device_id", "group_id", "status", "metadata")
        VALUES ($1, $2, $3, $4)
-       ON CONFLICT ("deviceId") DO NOTHING`,
+       ON CONFLICT ("device_id") DO NOTHING`,
       [
         deviceId,
         "sweep-test",
@@ -119,12 +119,12 @@ async function cleanupSweepData({ dbConfig, campaignIds }: CleanupParams) {
   await client.connect();
 
   await client.query(
-    `DELETE FROM delivery_events WHERE "deviceId" LIKE 'sweep-dev-%'`,
+    `DELETE FROM delivery_events WHERE "device_id" LIKE 'sweep-dev-%'`,
   );
 
   if (campaignIds.length > 0) {
     await client.query(
-      `DELETE FROM campaign_assets WHERE "campaignId" = ANY($1)`,
+      `DELETE FROM campaign_assets WHERE "campaign_id" = ANY($1)`,
       [campaignIds],
     );
     await client.query(`DELETE FROM campaigns WHERE id = ANY($1)`, [
@@ -133,7 +133,7 @@ async function cleanupSweepData({ dbConfig, campaignIds }: CleanupParams) {
   }
 
   await client.query(
-    `DELETE FROM devices WHERE "deviceId" LIKE 'sweep-dev-%'`,
+    `DELETE FROM devices WHERE "device_id" LIKE 'sweep-dev-%'`,
   );
 
   await client.end();

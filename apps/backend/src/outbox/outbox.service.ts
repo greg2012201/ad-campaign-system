@@ -6,8 +6,13 @@ import { Cron, CronExpression } from "@nestjs/schedule";
 import type Redis from "ioredis";
 import type Redlock from "redlock";
 import { v4 as uuidv4 } from "uuid";
-import { OutboxEntity } from "./outbox.entity";
 import { OUTBOX_REDIS_CLIENT, OUTBOX_REDLOCK } from "./redlock.provider";
+
+type OutboxRow = {
+  id: string;
+  event_type: string;
+  payload: Record<string, unknown>;
+};
 
 const BATCH_SIZE = 10;
 const LOCK_TTL_MS = 4000;
@@ -55,14 +60,14 @@ export class OutboxService implements OnModuleDestroy {
   private async processBatch() {
     const workerId = uuidv4();
 
-    const entries: OutboxEntity[] = await this.dataSource.transaction(
+    const entries: OutboxRow[] = await this.dataSource.transaction(
       async (manager) => {
-        const rows: OutboxEntity[] = await manager.query(
+        const rows: OutboxRow[] = await manager.query(
           `
         SELECT * FROM outbox
         WHERE processed = false
-          AND ("lockedBy" IS NULL OR "lockedAt" < now() - INTERVAL '${CLAIM_TTL_MINUTES} minutes')
-        ORDER BY "createdAt" ASC
+          AND ("locked_by" IS NULL OR "locked_at" < now() - INTERVAL '${CLAIM_TTL_MINUTES} minutes')
+        ORDER BY "created_at" ASC
         LIMIT $1
         FOR UPDATE SKIP LOCKED
         `,
@@ -73,7 +78,7 @@ export class OutboxService implements OnModuleDestroy {
 
         const ids = rows.map((r) => r.id);
         await manager.query(
-          `UPDATE outbox SET "lockedBy" = $1, "lockedAt" = now() WHERE id = ANY($2::uuid[]) AND processed = false`,
+          `UPDATE outbox SET "locked_by" = $1, "locked_at" = now() WHERE id = ANY($2::uuid[]) AND processed = false`,
           [workerId, ids],
         );
 
@@ -89,37 +94,37 @@ export class OutboxService implements OnModuleDestroy {
       try {
         const jobOpts = { jobId: `outbox-${entry.id}` };
 
-        switch (entry.eventType) {
+        switch (entry.event_type) {
           case "campaign_created":
             await this.templateBuildQueue.add(
-              entry.eventType,
+              entry.event_type,
               entry.payload,
               jobOpts,
             );
             break;
           case "template_ready":
             await this.publishQueue.add(
-              entry.eventType,
+              entry.event_type,
               entry.payload,
               jobOpts,
             );
             break;
           case "campaign_cancelled":
             await this.publishQueue.add(
-              entry.eventType,
+              entry.event_type,
               entry.payload,
               jobOpts,
             );
             break;
           default:
             this.logger.warn(
-              `Unknown event type: ${entry.eventType} for outbox entry ${entry.id}`,
+              `Unknown event type: ${entry.event_type} for outbox entry ${entry.id}`,
             );
             break;
         }
 
         await this.dataSource.query(
-          `UPDATE outbox SET processed = true, "processedAt" = now(), "lockedBy" = NULL, "lockedAt" = NULL WHERE id = $1 AND "lockedBy" = $2`,
+          `UPDATE outbox SET processed = true, "processed_at" = now(), "locked_by" = NULL, "locked_at" = NULL WHERE id = $1 AND "locked_by" = $2`,
           [entry.id, workerId],
         );
 
@@ -131,7 +136,7 @@ export class OutboxService implements OnModuleDestroy {
 
         try {
           await this.dataSource.query(
-            `UPDATE outbox SET "lockedBy" = NULL, "lockedAt" = NULL WHERE id = $1 AND "lockedBy" = $2`,
+            `UPDATE outbox SET "locked_by" = NULL, "locked_at" = NULL WHERE id = $1 AND "locked_by" = $2`,
             [entry.id, workerId],
           );
         } catch (e) {
@@ -150,7 +155,7 @@ export class OutboxService implements OnModuleDestroy {
   private async cleanupStaleClaims() {
     try {
       await this.dataSource.query(
-        `UPDATE outbox SET "lockedBy" = NULL, "lockedAt" = NULL WHERE processed = false AND "lockedAt" < now() - INTERVAL '${CLAIM_TTL_MINUTES} minutes'`,
+        `UPDATE outbox SET "locked_by" = NULL, "locked_at" = NULL WHERE processed = false AND "locked_at" < now() - INTERVAL '${CLAIM_TTL_MINUTES} minutes'`,
       );
     } catch (error) {
       this.logger.error(`Failed to cleanup stale outbox claims: ${error}`);

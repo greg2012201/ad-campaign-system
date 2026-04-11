@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { DataSource } from "typeorm";
 import path from "path";
+import { SnakeNamingStrategy } from "./snake-naming-strategy";
 
 const AppDataSource = new DataSource({
   type: "postgres",
@@ -14,6 +15,7 @@ const AppDataSource = new DataSource({
   synchronize: false,
   migrationsTransactionMode: "each",
   logging: true,
+  namingStrategy: new SnakeNamingStrategy(),
 });
 
 export default AppDataSource;

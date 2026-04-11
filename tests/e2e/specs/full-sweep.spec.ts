@@ -216,7 +216,7 @@ test.describe(`@sweep full-system integration sweep (${profile.name})`, () => {
     await client.connect();
 
     const { rows } = await client.query(
-      `SELECT * FROM delivery_events WHERE "deviceId" LIKE 'sweep-dev-%'`,
+      `SELECT * FROM delivery_events WHERE "device_id" LIKE 'sweep-dev-%'`,
     );
 
     const expectedCount =
@@ -239,7 +239,7 @@ test.describe(`@sweep full-system integration sweep (${profile.name})`, () => {
     await new Promise((r) => setTimeout(r, 2_000));
 
     const { rows: rowsAfterDuplicate } = await client.query(
-      `SELECT * FROM delivery_events WHERE "deviceId" LIKE 'sweep-dev-%'`,
+      `SELECT * FROM delivery_events WHERE "device_id" LIKE 'sweep-dev-%'`,
     );
 
     expect(rowsAfterDuplicate.length).toBe(expectedCount);
@@ -252,13 +252,13 @@ test.describe(`@sweep full-system integration sweep (${profile.name})`, () => {
     await client.connect();
 
     const { rows } = await client.query(
-      `SELECT "deviceId", "lastSeen" FROM devices WHERE "deviceId" LIKE 'sweep-dev-%'`,
+      `SELECT "device_id", "last_seen" FROM devices WHERE "device_id" LIKE 'sweep-dev-%'`,
     );
 
     expect(rows.length).toBe(deviceIds.length);
 
     for (const row of rows) {
-      expect(row.lastSeen).not.toBeNull();
+      expect(row.last_seen).not.toBeNull();
     }
 
     await client.end();

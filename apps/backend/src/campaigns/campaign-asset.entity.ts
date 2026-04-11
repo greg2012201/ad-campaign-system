@@ -43,6 +43,6 @@ export class CampaignAssetEntity {
   @ManyToOne(() => CampaignEntity, (campaign) => campaign.assets, {
     onDelete: "CASCADE",
   })
-  @JoinColumn({ name: "campaignId" })
+  @JoinColumn({ name: "campaign_id" })
   campaign: CampaignEntity;
 }

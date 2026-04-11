@@ -50,12 +50,12 @@ export class DeliveryEventEntity {
   createdAt: Date;
 
   @ManyToOne(() => DeviceEntity, { onDelete: "CASCADE" })
-  @JoinColumn({ name: "deviceId", referencedColumnName: "deviceId" })
+  @JoinColumn({ name: "device_id", referencedColumnName: "deviceId" })
   device: DeviceEntity;
 
   @ManyToOne(() => CampaignEntity, (campaign) => campaign.deliveryEvents, {
     onDelete: "CASCADE",
   })
-  @JoinColumn({ name: "campaignId" })
+  @JoinColumn({ name: "campaign_id" })
   campaign: CampaignEntity;
 }

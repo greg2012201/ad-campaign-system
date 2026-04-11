@@ -4,6 +4,7 @@ import { BullModule } from "@nestjs/bullmq";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { ScheduleModule } from "@nestjs/schedule";
 import { TypeOrmModule } from "@nestjs/typeorm";
+import { SnakeNamingStrategy } from "./database/snake-naming-strategy";
 import { CampaignsModule } from "./campaigns/campaigns.module";
 import { OutboxModule } from "./outbox/outbox.module";
 import { TemplateWorkerModule } from "./template-worker/template-worker.module";
@@ -29,6 +30,7 @@ import { AckConsumerModule } from "./ack-consumer/ack-consumer.module";
         autoLoadEntities: true,
         synchronize: false,
         logging: false,
+        namingStrategy: new SnakeNamingStrategy(),
       }),
     }),
     BullModule.forRootAsync({
